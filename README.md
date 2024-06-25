@@ -1,17 +1,17 @@
-# Título do Projeto
-
-Medical Diagnosis By X-ray And Symptoms
+# Medical Diagnosis By X-ray And Symptoms
 
 ## Sumário
 
 - [Sobre](#sobre)
 - [Começando](#comecando)
 - [Utilização](#utilizacao)
+- [Implantação](#implantacao)
 - [Contribuição](../CONTRIBUTING.md)
+- [Licença](#licenca)
 
 ## Sobre <a name="sobre"></a>
 
-Este projeto implementa uma aplicação web utilizando Flask para implantar um modelo de aprendizado profundo para classificação de imagens. O modelo, treinado em um conjunto de dados de imagens de raio-X de tórax, faz previsões para determinar se uma imagem mostra sinais de COVID-19, Pneumonia ou está Normal. A aplicação permite aos usuários fazer upload de uma imagem e receber previsões no formato JSON.
+Este projeto implementa uma aplicação web utilizando Flask para implantar um modelo de aprendizado profundo para classificação de imagens. O modelo, treinado em um conjunto de dados de imagens de raio-X de tórax, faz previsões para determinar se uma imagem mostra sinais de COVID-19, Pneumonia ou está Normal. A aplicação permite aos usuários fazer upload de uma imagem e receber previsões no formato JSON. Além disso, uma interface de usuário foi desenvolvida usando Flet para consumir essa API.
 
 ## Começando <a name="comecando"></a>
 
@@ -27,11 +27,13 @@ Certifique-se de ter os seguintes itens instalados:
 - numpy
 - PIL (Pillow)
 - requests
+- flet
+- jupyter
 
 Você pode instalá-los usando pip:
 
 ```bash
-pip install tensorflow flask numpy pillow requests
+pip install tensorflow flask numpy pillow requests flet jupyter
 ```
 
 ### Instalação
@@ -43,34 +45,73 @@ git clone https://github.com/Nill-pixel/Diagnostic.git
 cd diagnostic
 ```
 
-2. Baixe o arquivo do modelo pré-treinado (`CNN_model.keras`) no diretório `models`.
-
-3. Crie um diretório `uploads` na raiz do projeto:
-
-```bash
-mkdir uploads
-```
+2. Baixe o arquivo do modelo pré-treinado (`CNN_model.keras`) no diretório `src/api/models`.
 
 ### Utilização <a name="utilizacao"></a>
 
-1. Inicie o servidor Flask executando:
+#### API
+
+1. Navegue até o diretório da API:
 
 ```bash
-python app.py
+cd src/api
 ```
 
-2. Abra um navegador da web e acesse `http://localhost:5000`.
+2. Execute o notebook da API:
 
-3. Utilize a interface web para fazer o upload de uma imagem (PNG ou JPEG) de um raio-X de tórax.
+```bash
+jupyter notebook api.ipynb
+```
 
-4. Após o upload, o servidor exibirá as probabilidades previstas para os casos de COVID-19, Pneumonia e Normal com base na imagem.
+3. Siga as instruções no notebook para iniciar o servidor Flask.
 
-5. Explore o código para entender como a previsão é feita e como o Flask manipula as solicitações.
+#### Interface
+
+1. Navegue até o diretório da interface:
+
+```bash
+cd src/interface
+```
+
+2. Execute o arquivo `Main.py` para iniciar a interface Flet:
+
+```bash
+flet Main.py -d
+```
+
+3. Utilize a interface para consumir a API e visualizar as previsões de maneira mais amigável. A interface permite fazer o upload de imagens de raio-X e exibe os resultados em um gráfico de pizza utilizando o componente `PieChart`.
+
+## Implantação <a name="implantacao"></a>
+
+Para implantar este projeto em um ambiente ao vivo, siga estas etapas:
+
+1. Certifique-se de que você possui um servidor com suporte a Python.
+
+2. Instale os pré-requisitos no servidor conforme mencionado na seção de pré-requisitos.
+
+3. Clone o repositório no servidor e navegue até o diretório do projeto:
+
+```bash
+git clone https://github.com/Nill-pixel/Diagnostic.git
+cd diagnostic
+```
+
+4. Baixe o arquivo do modelo pré-treinado (`CNN_model.keras`) no diretório `src/api/models`.
+
+5. No servidor, execute o notebook da API para iniciar o servidor Flask:
+
+```bash
+cd src/api
+jupyter notebook api.ipynb
+```
+
+6. Para a interface, configure um serviço para executar o script `Main.py` e certifique-se de que ele possa acessar a API:
+
+```bash
+cd src/interface
+flet Main.py -d
+```
 
 ## Licença <a name="licenca"></a>
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
-Este README fornece uma visão geral do Sistema de Gestão de Firma de Investimentos, incluindo instruções de configuração e uso. Para informações detalhadas sobre cada recurso e componente, consulte a documentação do projeto.
