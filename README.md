@@ -41,8 +41,8 @@ pip install tensorflow flask numpy pillow requests
 1. Clone o repositório:
 
 ```bash
-git clone <url_do_repositorio>
-cd <nome_do_repositorio>
+git clone https://github.com/Nill-pixel/Diagnostic.git
+cd diagnostic
 ```
 
 2. Baixe o arquivo do modelo pré-treinado (`CNN_model.keras`) no diretório `models`.
@@ -72,7 +72,3 @@ python app.py
 ## Contribuição
 
 Por favor, leia [CONTRIBUTING.md](../CONTRIBUTING.md) para obter detalhes sobre nosso código de conduta e o processo para enviar pull requests.
-
----
-
-Esta estrutura de README fornece uma visão clara do projeto, como configurá-lo e como utilizá-lo. Certifique-se de substituir `<url_do_repositorio>` e `<nome_do_repositorio>` pela URL e nome reais do seu repositório. Ajuste quaisquer outros detalhes específicos com base nas particularidades do seu projeto.
