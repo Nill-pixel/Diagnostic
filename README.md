@@ -69,6 +69,10 @@ python app.py
 
 5. Explore o código para entender como a previsão é feita e como o Flask manipula as solicitações.
 
-## Contribuição
+## Licença <a name="licenca"></a>
 
-Por favor, leia [CONTRIBUTING.md](../CONTRIBUTING.md) para obter detalhes sobre nosso código de conduta e o processo para enviar pull requests.
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+Este README fornece uma visão geral do Sistema de Gestão de Firma de Investimentos, incluindo instruções de configuração e uso. Para informações detalhadas sobre cada recurso e componente, consulte a documentação do projeto.
