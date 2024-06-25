@@ -1,8 +1,6 @@
-Claro! Com base no projeto fornecido, vou ajudar a estruturar o arquivo README de acordo com as informações relevantes.
-
----
-
 # Título do Projeto
+
+Medical Diagnosis By X-ray And Symptoms
 
 ## Sumário
 
