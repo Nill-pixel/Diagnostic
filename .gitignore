@@ -1,1 +1,4 @@
 *.keras
+*.jpeg
+*.jpg
+*.png

@@ -1,37 +1,51 @@
 import flet as ft
-from components import PieChart
 import aiohttp
-import asyncio
+import json
+from components import PieChart  # Supondo que PieChart seja sua classe para gráficos
 
 
-async def send_data(symptoms, image_file_path):
-    api_url = "http://localhost:5000/predict"  # Substitua pelo URL da sua API
-    data = {"symptoms": symptoms}
+# Função para enviar dados para a API
+async def send_data(
+    data, image_file_path=None, api_url="http://localhost:5000/predict"
+):
+    headers = {"Content-Type": "application/json"}
 
-    form_data = aiohttp.FormData()
-    form_data.add_field("symptoms", str(symptoms))  # Add symptoms as a string
     if image_file_path:
+        form_data = aiohttp.FormData()
         form_data.add_field(
             "image", open(image_file_path, "rb"), filename=image_file_path
         )
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(api_url, data=form_data) as response:
-            if response.status == 200:
-                result = await response.json()
-                return result
-            else:
-                return {"error": "Erro ao enviar dados para a API"}
+        async with aiohttp.ClientSession() as session:
+            async with session.post(api_url, data=form_data) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    return result
+                else:
+                    return {"error": "Erro ao enviar dados para a API"}
+    else:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                api_url, data=json.dumps(data), headers=headers
+            ) as response:
+                if response.status == 200:
+                    result = await response.json()
+                    return result
+                else:
+                    return {"error": "Erro ao enviar dados para a API"}
 
 
+# Classe para representar um sintoma na interface
 class Symptom(ft.Column):
-    def __init__(self, symptom_name):
+    def __init__(self, symptom_name, api_name):
         super().__init__()
         self.symptom_name = symptom_name
+        self.api_name = api_name  # Nome do sintoma conforme esperado pela API
         self.display_symptom = ft.Checkbox(value=False, label=self.symptom_name)
         self.controls = [self.display_symptom]
 
 
+# Classe para a interface de upload de imagem
 class DiagnosticImage(ft.Column):
     def __init__(self):
         super().__init__()
@@ -45,6 +59,7 @@ class DiagnosticImage(ft.Column):
             self.selected_file_path = e.files[0].path
             self.image_path_text.value = self.selected_file_path
         else:
+            self.selected_file_path = None
             self.image_path_text.value = "Nenhuma imagem selecionada"
         self.update()
 
@@ -54,19 +69,87 @@ class DiagnosticImage(ft.Column):
         )
 
 
+# Aplicação principal que gerencia a interface e a interação com a API
 class MedicineApp(ft.Column):
     def __init__(self):
         super().__init__()
-        self.new_symptom = ft.Text("Medical Diagnosis By X-ray And Symptoms", size=30)
-        self.symptoms = ft.Column()
+        self.new_symptom = ft.Text("Diagnóstico Médico", size=30)
+        self.symptoms_grid = ft.GridView(
+            runs_count=3,
+            max_extent=200,
+            child_aspect_ratio=4.0,
+            spacing=2,
+            run_spacing=2,
+        )
         self.image_upload = DiagnosticImage()
         self.result_text = ft.Text()
-        self.pie_chart = None  # Inicializa pie_chart como None
+        self.pie_chart = None
 
         self.filter = ft.Tabs(
             selected_index=0,
             on_change=self.tabs_changed,
-            tabs=[ft.Tab(text="symptoms"), ft.Tab(text="image")],
+            tabs=[ft.Tab(text="sintomas"), ft.Tab(text="imagem")],
+        )
+
+        self.age_input = ft.TextField(label="Idade")
+        self.sex_input = ft.Dropdown(
+            label="Sexo",
+            options=[
+                ft.dropdown.Option("female", "Feminino"),
+                ft.dropdown.Option("male", "Masculino"),
+                ft.dropdown.Option("not_specified", "Não informado"),
+            ],
+        )
+        self.nature_input = ft.Dropdown(
+            label="Natureza",
+            options=[
+                ft.dropdown.Option("", "Não especificado"),
+                ft.dropdown.Option("high", "Alto"),
+                ft.dropdown.Option("low", "Baixo"),
+                ft.dropdown.Option("medium", "Médio"),
+            ],
+        )
+        self.treatment_input = ft.Dropdown(
+            label="Tratamento",
+            options=[
+                ft.dropdown.Option(
+                    "Adaptive servo-ventilation", "Ventilação servo-adaptativa"
+                ),
+                ft.dropdown.Option("Antibiotic", "Antibiótico"),
+                ft.dropdown.Option("Chemotherapy", "Quimioterapia"),
+                ft.dropdown.Option("Cough medicine", "Remédio para tosse"),
+                ft.dropdown.Option("Diuretics", "Diuréticos"),
+                ft.dropdown.Option(
+                    "Intrapulmonary Percussive Ventilation",
+                    "Ventilação por percussão intrapulmonar",
+                ),
+                ft.dropdown.Option("Intravenous fluids", "Fluidos intravenosos"),
+                ft.dropdown.Option("Mepolizumab", "Mepolizumabe"),
+                ft.dropdown.Option("Omalizumab", "Omalizumabe"),
+                ft.dropdown.Option("Oseltamivir", "Oseltamivir"),
+                ft.dropdown.Option("Pulmonary rehabilitation", "Reabilitação pulmonar"),
+                ft.dropdown.Option("Surgery", "Cirurgia"),
+                ft.dropdown.Option("aspirin", "Aspirina"),
+                ft.dropdown.Option("consult a doctor", "Consulte um médico"),
+                ft.dropdown.Option("consult doctor", "Consulte um médico"),
+                ft.dropdown.Option("ethambutol", "Etambutol"),
+                ft.dropdown.Option(
+                    "isotonic sodium chloride solution", "Solução salina isotônica"
+                ),
+                ft.dropdown.Option("itraconazole", "Itraconazol"),
+                ft.dropdown.Option("oxygen", "Oxigênio"),
+                ft.dropdown.Option("oxyzen", "Oxigênio"),
+                ft.dropdown.Option("pyrazinamide", "Pirazinamida"),
+                ft.dropdown.Option("rifampin", "Rifampicina"),
+                ft.dropdown.Option("saline nose drops", "Gotas nasais salinas"),
+                ft.dropdown.Option("stay away from cold places", "Evite lugares frios"),
+                ft.dropdown.Option(
+                    "steroids to reduce inflammation",
+                    "Esteroides para reduzir a inflamação",
+                ),
+                ft.dropdown.Option("surgery", "Cirurgia"),
+                ft.dropdown.Option("x-ray", "Raio-X"),
+            ],
         )
 
         self.width = 600
@@ -92,7 +175,11 @@ class MedicineApp(ft.Column):
                 spacing=25,
                 controls=[
                     self.filter,
-                    self.symptoms,
+                    self.symptoms_grid,
+                    self.age_input,
+                    self.sex_input,
+                    self.nature_input,
+                    self.treatment_input,
                     self.image_upload,
                     self.select_image_button,
                     self.submit_button,
@@ -101,7 +188,8 @@ class MedicineApp(ft.Column):
             ),
         ]
 
-        symptoms_list = [
+        # Lista de sintomas em português que serão exibidos na interface
+        symptoms_list_pt = [
             "Tosse",
             "Falta de ar",
             "Febre",
@@ -110,63 +198,127 @@ class MedicineApp(ft.Column):
             "Fadiga",
         ]
 
-        for symptom_name in symptoms_list:
-            symptom = Symptom(symptom_name)
-            self.symptoms.controls.append(symptom)
+        # Mapeamento de sintomas para API (nomes em inglês esperados pela API)
+        symptoms_mapping = {
+            "Tosse": " coughing",
+            "Falta de ar": "shortness of breath",
+            "Febre": "fever",
+            "Dor de garganta": "sore throat",
+            "Congestão nasal": "nasal congestion",
+            "Fadiga": "fatigue",
+            # Adicione outros sintomas conforme necessário
+        }
 
-    def add_clicked(self, e):
-        symptom = Symptom(self.new_symptom.value)
-        self.symptoms.controls.append(symptom)
-        self.new_symptom.value = ""
-        self.update()
+        for symptom_name_pt in symptoms_list_pt:
+            symptom_api_name = symptoms_mapping.get(
+                symptom_name_pt, symptom_name_pt.lower()
+            )
+            symptom = Symptom(symptom_name_pt, symptom_api_name)
+            self.symptoms_grid.controls.append(symptom)
 
     async def on_submit(self, e):
-        selected_symptoms = [
-            cb.display_symptom.label
-            for cb in self.symptoms.controls
-            if cb.display_symptom.value
-        ]
+        age = self.age_input.value
+        sex = self.sex_input.value
+        nature = self.nature_input.value
+        treatment = self.treatment_input.value
         status = self.filter.tabs[self.filter.selected_index].text
 
-        if status == "symptoms":
-            if selected_symptoms:
-                result = await send_data(selected_symptoms, None)
-                self.result_text.value = str(result)
+        if status == "sintomas":
+            selected_symptoms = [
+                symptom.api_name
+                for symptom in self.symptoms_grid.controls
+                if symptom.display_symptom.value
+            ]
+            if selected_symptoms and age and sex and nature and treatment:
+                data = {
+                    "symptoms": selected_symptoms,
+                    "age": age,
+                    "sex": sex,
+                    "nature": nature,
+                    "treatment": treatment,
+                }
+                result = await send_data(
+                    data, api_url="http://localhost:5000/predict_symptoms"
+                )
+                await self.show_result_dialog(result)
             else:
-                self.result_text.value = "Por favor, selecione os sintomas."
-        elif status == "image":
-            if self.image_upload.selected_file_path:
-                result = await send_data([], self.image_upload.selected_file_path)
-                self.result_text.value = str(result)
+                self.result_text.value = "Por favor, preencha todos os campos."
 
-                # Atualizar o MyPieChart com as novas previsões
+            if self.pie_chart is not None:
+                self.page.remove(self.pie_chart)
+                self.pie_chart = None
+
+        elif status == "imagem":
+            if self.image_upload.selected_file_path:
+                result = await send_data(
+                    {},
+                    self.image_upload.selected_file_path,
+                    api_url="http://localhost:5000/predict_image",
+                )
+                await self.show_result_dialog(result)
+
                 if "predictions" in result:
-                    predictions = result[
-                        "predictions"
-                    ]  # Recebeu as previsões diretamente
+                    predictions = result["predictions"]
                     new_predictions = {
                         key: float(value.replace("%", ""))
                         for key, value in predictions.items()
                     }
-                    if self.pie_chart is not None:
-                        self.page.remove(
-                            self.pie_chart
-                        )  # Remover o gráfico antigo se existir
-                    self.pie_chart = PieChart.MyPieChart(
-                        new_predictions
-                    )  # Criar um novo MyPieChart
-                    self.page.add(self.pie_chart)  # Adicionar o gráfico atualizado
+
+                    if self.pie_chart is None:
+                        self.pie_chart = PieChart.MyPieChart(new_predictions)
+                        # Atualiza para adicionar o gráfico ao resultado do texto
+                        self.result_text.value = "Resultado com gráfico"
+                    else:
+                        self.page.remove(self.pie_chart)
+                        self.pie_chart = PieChart.MyPieChart(new_predictions)
+                        # Atualiza para adicionar o gráfico ao resultado do texto
+                        self.result_text.value = "Resultado com gráfico"
+
+                    self.update()
+
             else:
                 self.result_text.value = "Por favor, selecione uma imagem."
 
         self.update()
 
+    async def show_result_dialog(self, result):
+        if "error" in result:
+            alert = ft.AlertDialog(
+                title=ft.Text("Erro"), content=ft.Text(result["error"])
+            )
+        else:
+            title = ft.Text("Resultado")
+
+            if "predicted_treatment" in result:
+                content = ft.Text(f"Doença Prevista: {result['predicted_treatment']}")
+
+            # Adicionar gráfico se disponível
+            if "predictions" in result:
+                predictions = result["predictions"]
+                new_predictions = {
+                    key: float(value.replace("%", ""))
+                    for key, value in predictions.items()
+                }
+
+                self.pie_chart = PieChart.MyPieChart(new_predictions)
+                content_with_chart = ft.Column(controls=[self.pie_chart])
+                alert = ft.AlertDialog(title=title, content=content_with_chart)
+            else:
+                alert = ft.AlertDialog(title=title, content=content)
+
+        await self.page.open(alert)
+
     def before_update(self):
         status = self.filter.tabs[self.filter.selected_index].text
-        for symptom in self.symptoms.controls:
-            symptom.visible = status == "symptoms"
-        self.image_upload.visible = status == "image"
-        self.select_image_button.visible = status == "image"
+
+        for symptom in self.symptoms_grid.controls:
+            symptom.visible = status == "sintomas"
+        self.age_input.visible = status == "sintomas"
+        self.sex_input.visible = status == "sintomas"
+        self.nature_input.visible = status == "sintomas"
+        self.treatment_input.visible = status == "sintomas"
+        self.image_upload.visible = status == "imagem"
+        self.select_image_button.visible = status == "imagem"
         self.submit_button.visible = True
 
     def tabs_changed(self, e):
@@ -174,8 +326,9 @@ class MedicineApp(ft.Column):
         self.update()
 
 
+# Função principal que inicializa a aplicação Flet
 def main(page: ft.Page):
-    page.title = "Medical Diagnostic"
+    page.title = "Diagnóstico Médico"
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
 
     app = MedicineApp()
