@@ -11,7 +11,7 @@
 
 ## Sobre <a name="sobre"></a>
 
-Este projeto implementa uma aplicação web utilizando Flask para implantar um modelo de aprendizado profundo para classificação de imagens. O modelo, treinado em um conjunto de dados de imagens de raio-X de tórax, faz previsões para determinar se uma imagem mostra sinais de COVID-19, Pneumonia ou está Normal. A aplicação permite aos usuários fazer upload de uma imagem e receber previsões no formato JSON. Além disso, uma interface de usuário foi desenvolvida usando Flet para consumir essa API.
+Este projeto implementa uma aplicação descktop utilizando Flet para implantar um modelo de aprendizado profundo para classificação de imagens. O modelo, treinado em um conjunto de dados de imagens de raio-X de tórax, faz previsões para determinar se uma imagem mostra sinais de COVID-19, Pneumonia ou está Normal. A aplicação permite aos usuários fazer upload de uma imagem e receber previsões no formato JSON. Além disso, uma interface de usuário foi desenvolvida usando Flet para consumir essa API.
 
 ## Começando <a name="comecando"></a>
 
