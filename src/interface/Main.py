@@ -1,10 +1,9 @@
+from components import PieChart  # Supondo que PieChart seja sua classe para gráficos
 import flet as ft
 import aiohttp
 import json
-from components import PieChart  # Supondo que PieChart seja sua classe para gráficos
 
 
-# Função para enviar dados para a API
 async def send_data(
     data, image_file_path=None, api_url="http://localhost:5000/predict"
 ):
@@ -35,7 +34,6 @@ async def send_data(
                     return {"error": "Erro ao enviar dados para a API"}
 
 
-# Classe para representar um sintoma na interface
 class Symptom(ft.Column):
     def __init__(self, symptom_name, api_name):
         super().__init__()
@@ -45,7 +43,6 @@ class Symptom(ft.Column):
         self.controls = [self.display_symptom]
 
 
-# Classe para a interface de upload de imagem
 class DiagnosticImage(ft.Column):
     def __init__(self):
         super().__init__()
@@ -69,7 +66,6 @@ class DiagnosticImage(ft.Column):
         )
 
 
-# Aplicação principal que gerencia a interface e a interação com a API
 class MedicineApp(ft.Column):
     def __init__(self):
         super().__init__()
@@ -97,7 +93,7 @@ class MedicineApp(ft.Column):
             options=[
                 ft.dropdown.Option("female", "Feminino"),
                 ft.dropdown.Option("male", "Masculino"),
-                ft.dropdown.Option("not_specified", "Não informado"),
+                ft.dropdown.Option("not to say", "Não informado"),
             ],
         )
         self.nature_input = ft.Dropdown(
@@ -196,16 +192,28 @@ class MedicineApp(ft.Column):
             "Dor de garganta",
             "Congestão nasal",
             "Fadiga",
+            "Alergia",
+            "Pele azulada",
+            "Congestão no peito",
+            "Dor no peito",
+            "Calafrios",
+            "Tosse",
+            # Adicione outros sintomas conforme necessário
         ]
 
         # Mapeamento de sintomas para API (nomes em inglês esperados pela API)
         symptoms_mapping = {
-            "Tosse": " coughing",
-            "Falta de ar": "shortness of breath",
-            "Febre": "fever",
-            "Dor de garganta": "sore throat",
-            "Congestão nasal": "nasal congestion",
-            "Fadiga": "fatigue",
+            "Tosse": "Cough",
+            "Falta de ar": "Shortness of breath",
+            "Febre": "Fever",
+            "Dor de garganta": "Sore throat",
+            "Congestão nasal": "Nasal congestion",
+            "Fadiga": "Fatigue",
+            "Alergia": "Allergy",
+            "Pele azulada": "Bluish skin",
+            "Congestão no peito": "Chest congestion",
+            "Dor no peito": "Chest pain",
+            "Calafrios": "Chills",
             # Adicione outros sintomas conforme necessário
         }
 
@@ -266,13 +274,11 @@ class MedicineApp(ft.Column):
 
                     if self.pie_chart is None:
                         self.pie_chart = PieChart.MyPieChart(new_predictions)
-                        # Atualiza para adicionar o gráfico ao resultado do texto
-                        self.result_text.value = "Resultado com gráfico"
+                        self.page.add(self.pie_chart)
                     else:
                         self.page.remove(self.pie_chart)
                         self.pie_chart = PieChart.MyPieChart(new_predictions)
-                        # Atualiza para adicionar o gráfico ao resultado do texto
-                        self.result_text.value = "Resultado com gráfico"
+                        self.page.add(self.pie_chart)
 
                     self.update()
 
@@ -287,24 +293,35 @@ class MedicineApp(ft.Column):
                 title=ft.Text("Erro"), content=ft.Text(result["error"])
             )
         else:
-            title = ft.Text("Resultado")
-
             if "predicted_treatment" in result:
-                content = ft.Text(f"Doença Prevista: {result['predicted_treatment']}")
-
-            # Adicionar gráfico se disponível
-            if "predictions" in result:
+                predicted_treatment = result["predicted_treatment"]
+                alert_content = ft.Column(
+                    controls=[
+                        ft.Text("Resultado"),
+                        ft.Text(f"Doenças Prevista: {predicted_treatment}"),
+                    ]
+                )
+                alert = ft.AlertDialog(
+                    title=ft.Text("Resultado"), content=alert_content
+                )
+            elif "predictions" in result:
                 predictions = result["predictions"]
                 new_predictions = {
                     key: float(value.replace("%", ""))
                     for key, value in predictions.items()
                 }
 
-                self.pie_chart = PieChart.MyPieChart(new_predictions)
-                content_with_chart = ft.Column(controls=[self.pie_chart])
-                alert = ft.AlertDialog(title=title, content=content_with_chart)
-            else:
-                alert = ft.AlertDialog(title=title, content=content)
+                if self.pie_chart is None:
+                    self.pie_chart = PieChart.MyPieChart(new_predictions)
+                else:
+                    self.pie_chart.update_data(new_predictions)
+
+                alert_content = ft.Column(
+                    controls=[ft.Text("Resultado"), self.pie_chart]
+                )
+                alert = ft.AlertDialog(
+                    title=ft.Text("Resultado"), content=alert_content
+                )
 
         await self.page.open(alert)
 
@@ -326,7 +343,6 @@ class MedicineApp(ft.Column):
         self.update()
 
 
-# Função principal que inicializa a aplicação Flet
 def main(page: ft.Page):
     page.title = "Diagnóstico Médico"
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
