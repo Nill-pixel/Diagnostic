@@ -252,10 +252,6 @@ class MedicineApp(ft.Column):
             else:
                 self.result_text.value = "Por favor, preencha todos os campos."
 
-            if self.pie_chart is not None:
-                self.page.remove(self.pie_chart)
-                self.pie_chart = None
-
         elif status == "imagem":
             if self.image_upload.selected_file_path:
                 result = await send_data(
@@ -297,7 +293,6 @@ class MedicineApp(ft.Column):
                 predicted_treatment = result["predicted_treatment"]
                 alert_content = ft.Column(
                     controls=[
-                        ft.Text("Resultado"),
                         ft.Text(f"Doenças Prevista: {predicted_treatment}"),
                     ]
                 )
@@ -314,7 +309,7 @@ class MedicineApp(ft.Column):
                 if self.pie_chart is None:
                     self.pie_chart = PieChart.MyPieChart(new_predictions)
                 else:
-                    self.pie_chart.update_data(new_predictions)
+                    self.pie_chart = PieChart.MyPieChart(new_predictions)
 
                 alert_content = ft.Column(
                     controls=[ft.Text("Resultado"), self.pie_chart]

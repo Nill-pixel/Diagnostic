@@ -45,14 +45,15 @@ class MyPieChart(ft.UserControl):
 
     def build(self):
         self.sections = []
-        colors = [ft.colors.GREEN, ft.colors.YELLOW, ft.colors.RED]
+        colors = [ft.colors.GREEN, ft.colors.YELLOW, ft.colors.RED, ft.colors.PURPLE]
         icons = [
-            ft.icons.AC_UNIT,
-            ft.icons.ACCESS_ALARM,
-            ft.icons.APPLE,
+            ft.icons.ACCESSIBILITY_SHARP,
+            ft.icons.SICK_OUTLINED,
+            ft.icons.SICK_SHARP,
+            ft.icons.BUBBLE_CHART,
         ]
 
-        self.categories = ["Normal", "COVID", "Pneumonia"]
+        self.categories = ["Normal", "COVID", "Pneumonia", "Tuberculose"]
         for idx, category in enumerate(self.categories):
             probability = self.predictions.get(
                 category, 0.0
@@ -61,6 +62,7 @@ class MyPieChart(ft.UserControl):
                 ft.PieChartSection(
                     probability * 1,
                     title=f"{category} : {probability * 1:.2f}%",
+                    title_position=0.1,
                     title_style=self.normal_title_style,
                     color=colors[idx],
                     radius=self.normal_radius,
@@ -95,5 +97,7 @@ class MyPieChart(ft.UserControl):
                 self.sections[idx].color = ft.colors.YELLOW
             elif category == "Pneumonia":
                 self.sections[idx].color = ft.colors.RED
+            elif category == "Tuberculose":
+                self.sections[idx].color = ft.colors.PURPLE
 
         self.chart.update()
